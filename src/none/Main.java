@@ -85,7 +85,27 @@ public class Main {
                     break;
                 case "7":
                     System.out.println("Bài 7 được chọn.");
-                    // Thực hiện hành động cho Bài 7
+                    BankAccount account = new BankAccount(1000); // Tạo tài khoản với số dư ban đầu là 1000
+                    ExecutorService executor = Executors.newFixedThreadPool(10); // Tạo một nhóm luồng với 10 luồng
+
+                    // Tạo và chạy các giao dịch
+                    for (int i = 0; i < 10; i++) {
+                        double amount = (i + 1) * 100; // Số tiền gửi hoặc rút tăng dần
+                        executor.execute(new BankTransaction(account, true, amount)); // Gửi tiền
+                        executor.execute(new BankTransaction(account, false, amount / 2)); // Rút tiền
+                    }
+
+                    // Đóng ExecutorService
+                    executor.shutdown();
+                    try {
+                        if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                            executor.shutdownNow();
+                        }
+                    } catch (InterruptedException e) {
+                        executor.shutdownNow();
+                    }
+
+                    System.out.println("Final balance: " + account.getBalance());
                     break;
             }
         }
